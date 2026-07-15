@@ -28,8 +28,4 @@ Caching: The workflow is intentionally lightweight (no Node.js build step). No a
 - Signatures & Performance: https://github.com/cftcai/ai-skill-signatures#performance
 - Mock malicious skill fixture (canonical test case): https://github.com/cftcai/ai-skill-scanner/blob/main/tests/malicious_skill.py
 
-## Hosting
-
-GitHub Pages (recommended for simplicity) or Vercel (for future serverless API integration).
-
 This repository is intentionally separate to keep the core CLI and signatures clean and focused.
