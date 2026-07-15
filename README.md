@@ -1,5 +1,7 @@
 # ai-skill-scanner-web
 
+[![Deploy static site to GitHub Pages](https://github.com/cftcai/ai-skill-scanner-web/actions/workflows/pages.yml/badge.svg)](https://github.com/cftcai/ai-skill-scanner-web/actions/workflows/pages.yml)
+
 Minimal static web frontend for the ai-skill-scanner project.
 
 - Clean URL input form (empty by default)
