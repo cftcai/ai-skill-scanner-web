@@ -29,15 +29,21 @@
     <div class="mb-6 px-4 py-3 rounded-2xl bg-amber-950 border border-amber-900 text-amber-400 text-sm flex items-start gap-3">
       <i class="fa-solid fa-exclamation-triangle mt-0.5"></i>
       <div>
-        <strong>Early demo.</strong> Real custom URL scanning requires the <strong>Scan URL</strong> workflow (workflow_dispatch) or the CLI. 
-        The core scanner (v1.1.0) with dynamic signatures and SHA verification is fully functional.
+        <strong>Early static demo.</strong> Real custom URL scanning requires the <strong>Scan URL</strong> workflow or the CLI. 
+        The core scanner (v1.1.0) with <strong>dynamic signatures + SHA verification</strong> is fully functional.
       </div>
     </div>
 
-    <!-- Version info -->
-    <div class="mb-4 text-xs text-zinc-500 flex items-center gap-2">
-      <span>Using Scanner <a href="https://github.com/cftcai/ai-skill-scanner" class="underline">v1.1.0</a> • Signatures from <a href="https://github.com/cftcai/ai-skill-signatures" class="underline">main</a> (SHA verified)</span>
-      <span id="latest-sha" class="text-emerald-400"></span>
+    <!-- Version + Signature Status -->
+    <div class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+      <div class="text-zinc-500">
+        Using Scanner <a href="https://github.com/cftcai/ai-skill-scanner" class="underline">v1.1.0</a>
+      </div>
+      <div class="inline-flex items-center gap-1.5 rounded-full bg-emerald-950 px-3 py-0.5 text-emerald-400">
+        <i class="fa-solid fa-shield-halved text-xs"></i>
+        <span>Dynamic signatures + SHA verified</span>
+      </div>
+      <span id="latest-sha" class="text-emerald-400 font-mono"></span>
     </div>
 
     <!-- Form -->
@@ -52,7 +58,10 @@
             <i class="fa-solid fa-flask"></i> <span>Load Demo Fixture</span>
           </button>
         </div>
-        <p class="text-xs text-zinc-500 mt-2">Click "Load Demo Fixture" to test with a mock malicious skill. For real custom URLs, use the <strong>Scan URL</strong> workflow or CLI.</p>
+        <p class="text-xs text-zinc-500 mt-2">
+          <strong>Demo mode:</strong> Loads a mock malicious skill that tests dangerous execution, exfiltration, prompt injection, and obfuscation.
+          For real repositories use the <strong>Scan URL</strong> workflow or CLI.
+        </p>
       </div>
 
       <button onclick="runScan()" 
@@ -94,7 +103,7 @@
 
     <!-- Footer note -->
     <div class="mt-12 text-center text-xs text-zinc-500">
-      This is a minimal static demo. For real custom URL scans use the <strong>Scan URL</strong> workflow or the CLI.
+      This is a minimal static demo. Real scanning of custom URLs requires the <strong>Scan URL</strong> workflow or the CLI.
     </div>
   </div>
 
