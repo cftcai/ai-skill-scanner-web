@@ -25,9 +25,18 @@
       </div>
     </div>
 
+    <!-- Status Notice -->
+    <div class="mb-6 px-4 py-3 rounded-2xl bg-amber-950 border border-amber-900 text-amber-400 text-sm flex items-start gap-3">
+      <i class="fa-solid fa-exclamation-triangle mt-0.5"></i>
+      <div>
+        <strong>Early demo.</strong> Real custom URL scanning requires the <strong>Scan URL</strong> workflow (workflow_dispatch) or the CLI. 
+        The core scanner (v1.1.0) with dynamic signatures and SHA verification is fully functional.
+      </div>
+    </div>
+
     <!-- Version info -->
     <div class="mb-4 text-xs text-zinc-500 flex items-center gap-2">
-      <span>Using Scanner <a href="https://github.com/cftcai/ai-skill-scanner" class="underline">v1.0.0</a> • Signatures latest from <a href="https://github.com/cftcai/ai-skill-signatures" class="underline">main</a></span>
+      <span>Using Scanner <a href="https://github.com/cftcai/ai-skill-scanner" class="underline">v1.1.0</a> • Signatures from <a href="https://github.com/cftcai/ai-skill-signatures" class="underline">main</a> (SHA verified)</span>
       <span id="latest-sha" class="text-emerald-400"></span>
     </div>
 
@@ -43,7 +52,7 @@
             <i class="fa-solid fa-flask"></i> <span>Load Demo Fixture</span>
           </button>
         </div>
-        <p class="text-xs text-zinc-500 mt-2">Click "Load Demo Fixture" to test with the canonical mock malicious skill. For real custom URLs, dispatch the <strong>Scan URL</strong> workflow from the scanner repo Actions tab.</p>
+        <p class="text-xs text-zinc-500 mt-2">Click "Load Demo Fixture" to test with a mock malicious skill. For real custom URLs, use the <strong>Scan URL</strong> workflow or CLI.</p>
       </div>
 
       <button onclick="runScan()" 
@@ -85,7 +94,7 @@
 
     <!-- Footer note -->
     <div class="mt-12 text-center text-xs text-zinc-500">
-      This is a minimal static demo. For real custom URL scans use the <strong>Scan URL</strong> workflow (workflow_dispatch with url input) in the scanner repo or the CLI.
+      This is a minimal static demo. For real custom URL scans use the <strong>Scan URL</strong> workflow or the CLI.
     </div>
   </div>
 
@@ -100,7 +109,7 @@ async function fetchLatestVersions() {
     const sig = await sigRes.json();
     document.getElementById('latest-sha').innerHTML = `• Scanner: <span class="font-mono">${scanner.sha.substring(0,7)}</span> • Signatures: <span class="font-mono">${sig.sha.substring(0,7)}</span>`;
   } catch(e) {
-    // Silent fail, static fallback already shown
+    // Silent fail
   }
 }
 
