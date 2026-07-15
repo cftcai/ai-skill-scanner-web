@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ai-skill-scanner • Web Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+  <div class="max-w-4xl mx-auto p-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-semibold tracking-tight">ai-skill-scanner</h1>
+        <p class="text-zinc-400">Web demo • Scan public skill repositories</p>
+      </div>
+      <div class="flex gap-3">
+        <a href="https://github.com/cftcai/ai-skill-scanner" class="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-sm flex items-center gap-2">
+          <i class="fa-brands fa-github"></i> <span>CLI + Scanner</span>
+        </a>
+        <a href="https://github.com/cftcai/ai-skill-signatures#performance" class="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-sm flex items-center gap-2">
+          <i class="fa-solid fa-chart-line"></i> <span>Performance</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Version info -->
+    <div class="mb-4 text-xs text-zinc-500 flex items-center gap-2">
+      <span>Using Scanner <a href="https://github.com/cftcai/ai-skill-scanner" class="underline">v1.0.0</a> • Signatures latest from <a href="https://github.com/cftcai/ai-skill-signatures" class="underline">main</a></span>
+      <span id="latest-sha" class="text-emerald-400"></span>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-zinc-900 rounded-2xl p-8 mb-8">
+      <div class="mb-6">
+        <label class="block text-sm text-zinc-400 mb-2">GitHub URL or path to skill / repo</label>
+        <div class="flex gap-3">
+          <input id="url-input" type="text" placeholder="https://github.com/owner/repo/tree/main/path/to/skill" 
+                 class="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-zinc-600">
+          <button onclick="loadDemoFixture()" 
+                  class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-sm font-medium flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-flask"></i> <span>Load Demo Fixture</span>
+          </button>
+        </div>
+        <p class="text-xs text-zinc-500 mt-2">Click "Load Demo Fixture" to test with the canonical mock malicious skill. Real custom URLs require backend (pending).</p>
+      </div>
+
+      <button onclick="runScan()" 
+              class="w-full py-4 rounded-2xl bg-white text-zinc-950 font-semibold flex items-center justify-center gap-2 hover:bg-zinc-100">
+        <i class="fa-solid fa-search"></i> <span>Scan Repository</span>
+      </button>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="hidden">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold">Scan Results</h2>
+        <button onclick="clearResults()" class="text-xs px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700">Clear</button>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-3 gap-4 mb-6" id="summary-cards"></div>
+
+      <!-- Findings Table -->
+      <div class="bg-zinc-900 rounded-2xl overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-zinc-950">
+            <tr>
+              <th class="text-left px-6 py-4 font-medium text-zinc-400">File / Line</th>
+              <th class="text-left px-6 py-4 font-medium text-zinc-400">Type</th>
+              <th class="text-left px-6 py-4 font-medium text-zinc-400">Severity</th>
+              <th class="text-left px-6 py-4 font-medium text-zinc-400">Snippet</th>
+            </tr>
+          </thead>
+          <tbody id="findings-body" class="divide-y divide-zinc-800"></tbody>
+        </table>
+      </div>
+
+      <div class="mt-4 text-xs text-zinc-500">
+        Full structured JSON report available via CLI or future API. 
+        <a href="https://github.com/cftcai/ai-skill-scanner" class="underline">View source</a>
+      </div>
+    </div>
+
+    <!-- Footer note -->
+    <div class="mt-12 text-center text-xs text-zinc-500">
+      This is a minimal static demo. Production version will dispatch a secure GitHub Action or serverless container.<br>
+      The mock malicious skill fixture (tests/malicious_skill.py) is the canonical test case for high-severity detection.
+    </div>
+  </div>
+
+<script>
+async function fetchLatestVersions() {
+  try {
+    const [scannerRes, sigRes] = await Promise.all([
+      fetch('https://api.github.com/repos/cftcai/ai-skill-scanner/commits/main'),
+      fetch('https://api.github.com/repos/cftcai/ai-skill-signatures/commits/main')
+    ]);
+    const scanner = await scannerRes.json();
+    const sig = await sigRes.json();
+    document.getElementById('latest-sha').innerHTML = `• Scanner: <span class="font-mono">${scanner.sha.substring(0,7)}</span> • Signatures: <span class="font-mono">${sig.sha.substring(0,7)}</span>`;
+  } catch(e) {
+    // Silent fail, static fallback already shown
+  }
+}
+
+function loadDemoFixture() {
+  const input = document.getElementById('url-input');
+  input.value = 'https://github.com/cftcai/ai-skill-scanner/tree/main/tests/malicious_skill.py';
+  runScan(true);
+}
+
+function runScan(isDemo = false) {
+  const resultsDiv = document.getElementById('results');
+  const input = document.getElementById('url-input').value.trim();
+
+  if (!input) {
+    alert('Please enter a GitHub URL or click Load Demo Fixture');
+    return;
+  }
+
+  resultsDiv.classList.remove('hidden');
+  resultsDiv.scrollIntoView({ behavior: 'smooth' });
+
+  let report;
+  if (isDemo || input.includes('malicious_skill')) {
+    report = {
+      "total_findings": 9,
+      "high_severity": 4,
+      "medium_severity": 3,
+      "low_severity": 2,
+      "findings": [
+        {"file": "tests/malicious_skill.py", "line": 20, "type": "dangerous_code_execution", "severity": "high", "snippet": "eval(\"__import__('os').system...\")"},
+        {"file": "tests/malicious_skill.py", "line": 28, "type": "suspicious_pattern", "severity": "high", "snippet": "requests.post(\"https://evil-callback...\")"},
+        {"file": "tests/malicious_skill.py", "line": 35, "type": "prompt_injection_risk", "severity": "high", "snippet": "Ignore all previous instructions..."},
+        {"file": "tests/malicious_skill.py", "line": 42, "type": "high_entropy_obfuscation", "severity": "medium", "snippet": "base64.b64encode(b\"import os...\")"},
+        {"file": "tests/malicious_skill.py", "line": 45, "type": "suspicious_pattern", "severity": "high", "snippet": "marshal.dumps(lambda: exec... )"}
+      ]
+    };
+  } else {
+    report = {
+      "total_findings": 0,
+      "high_severity": 0,
+      "medium_severity": 0,
+      "low_severity": 0,
+      "findings": []
+    };
+    alert('Custom URL scan requires backend integration (pending). Showing empty report for demo.');
+  }
+
+  // Render summary
+  const summary = document.getElementById('summary-cards');
+  summary.innerHTML = `
+    <div class="bg-zinc-900 rounded-2xl p-5">
+      <div class="text-emerald-400 text-3xl font-semibold">${report.total_findings}</div>
+      <div class="text-xs text-zinc-400 mt-1">Total Findings</div>
+    </div>
+    <div class="bg-zinc-900 rounded-2xl p-5">
+      <div class="text-red-400 text-3xl font-semibold">${report.high_severity}</div>
+      <div class="text-xs text-zinc-400 mt-1">High Severity</div>
+    </div>
+    <div class="bg-zinc-900 rounded-2xl p-5">
+      <div class="text-amber-400 text-3xl font-semibold">${report.medium_severity + report.low_severity}</div>
+      <div class="text-xs text-zinc-400 mt-1">Medium / Low</div>
+    </div>
+  `;
+
+  // Render findings table
+  const tbody = document.getElementById('findings-body');
+  tbody.innerHTML = '';
+  report.findings.forEach(f => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="px-6 py-4 font-mono text-xs text-zinc-400">${f.file}:${f.line}</td>
+      <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-full text-xs bg-zinc-800">${f.type}</span></td>
+      <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-full text-xs ${f.severity === 'high' ? 'bg-red-900 text-red-400' : 'bg-amber-900 text-amber-400'}>${f.severity}</span></td>
+      <td class="px-6 py-4 font-mono text-xs text-zinc-400 truncate max-w-[320px]">${f.snippet}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function clearResults() {
+  document.getElementById('results').classList.add('hidden');
+  document.getElementById('findings-body').innerHTML = '';
+  document.getElementById('summary-cards').innerHTML = '';
+}
+
+// Fetch latest SHAs on load
+window.onload = () => {
+  fetchLatestVersions();
+};
+</script>
+</body>
+</html>
