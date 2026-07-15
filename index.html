@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ai-skill-scanner • Web Demo</title>
+  <title>ai-skill-scanner • Web</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
@@ -19,7 +19,7 @@
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
       <div>
         <h1 class="text-3xl font-semibold tracking-tight">ai-skill-scanner</h1>
-        <p class="text-zinc-400">Web demo • Scan public skill repositories</p>
+        <p class="text-zinc-400">Web • Scan public skill repositories</p>
       </div>
       <div class="flex gap-3 flex-wrap">
         <a href="https://github.com/cftcai/ai-skill-scanner" class="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-sm flex items-center gap-2">
@@ -35,7 +35,7 @@
     <div class="mb-6 px-4 py-3 rounded-2xl bg-amber-950 border border-amber-900 text-amber-400 text-sm flex items-start gap-3">
       <i class="fa-solid fa-exclamation-triangle mt-0.5"></i>
       <div>
-        <strong>Early static demo.</strong> Real custom URL scanning requires the <strong>Scan URL</strong> workflow or the CLI. 
+        <strong>Early public release.</strong> Real custom URL scanning requires the <strong>Scan URL</strong> workflow or the CLI. 
         The core scanner (v1.1.0) with <strong>dynamic signatures + SHA verification</strong> is fully functional.
       </div>
     </div>
@@ -114,7 +114,7 @@
 
     <!-- Footer note -->
     <div class="mt-12 text-center text-xs text-zinc-500">
-      This is a minimal static demo. Real scanning of custom URLs requires the <strong>Scan URL</strong> workflow or the CLI.
+      This is a minimal static web interface. Real scanning of custom URLs requires the <strong>Scan URL</strong> workflow or the CLI.
     </div>
   </div>
 
@@ -186,7 +186,7 @@ function runScan(isDemo = false) {
       "low_severity": 0,
       "findings": []
     };
-    showError('Custom URL scanning is not supported in this static demo. Use the Scan URL workflow or CLI instead.');
+    showError('Custom URL scanning is not supported in this static interface. Use the Scan URL workflow or CLI instead.');
     // Still show empty results for clarity
   }
 
