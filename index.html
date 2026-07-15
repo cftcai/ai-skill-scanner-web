@@ -43,7 +43,7 @@
             <i class="fa-solid fa-flask"></i> <span>Load Demo Fixture</span>
           </button>
         </div>
-        <p class="text-xs text-zinc-500 mt-2">Click "Load Demo Fixture" to test with the canonical mock malicious skill. Real custom URLs require backend (pending).</p>
+        <p class="text-xs text-zinc-500 mt-2">Click "Load Demo Fixture" to test with the canonical mock malicious skill. For real custom URLs, dispatch the <strong>Scan URL</strong> workflow from the scanner repo Actions tab.</p>
       </div>
 
       <button onclick="runScan()" 
@@ -78,15 +78,14 @@
       </div>
 
       <div class="mt-4 text-xs text-zinc-500">
-        Full structured JSON report available via CLI or future API. 
+        Full structured JSON report available via CLI or the Scan URL workflow artifact.
         <a href="https://github.com/cftcai/ai-skill-scanner" class="underline">View source</a>
       </div>
     </div>
 
     <!-- Footer note -->
     <div class="mt-12 text-center text-xs text-zinc-500">
-      This is a minimal static demo. Production version will dispatch a secure GitHub Action or serverless container.<br>
-      The mock malicious skill fixture (tests/malicious_skill.py) is the canonical test case for high-severity detection.
+      This is a minimal static demo. For real custom URL scans use the <strong>Scan URL</strong> workflow (workflow_dispatch with url input) in the scanner repo or the CLI.
     </div>
   </div>
 
@@ -146,7 +145,7 @@ function runScan(isDemo = false) {
       "low_severity": 0,
       "findings": []
     };
-    alert('Custom URL scan requires backend integration (pending). Showing empty report for demo.');
+    alert('Custom URL scan requires the Scan URL workflow or CLI. Showing empty report for demo.');
   }
 
   // Render summary
