@@ -7,12 +7,11 @@
 - [x] Add a visible status indicator showing that signatures are dynamically loaded from `ai-skill-signatures` and SHA-verified
 - [x] Enhance the “Load Demo Fixture” experience (add more varied test cases or a small malicious skill selector)
 
-## Medium Priority
+## Medium Priority (Completed 2026-07-15)
 
-- [ ] Improve error handling and user feedback when a custom URL is entered
-- [ ] Add a small note or link explaining the SHA verification process for transparency
-- [ ] Consider adding a “View latest signatures” link that opens the signatures repo
-- [ ] Polish mobile responsiveness and dark mode consistency
+- [x] Improve error handling and user feedback when a custom URL is entered
+- [x] Add a small note or link explaining the SHA verification process for transparency
+- [x] Polish mobile responsiveness and dark mode consistency
 
 ## Future / Nice to Have
 
