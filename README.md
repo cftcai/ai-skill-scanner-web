@@ -2,24 +2,34 @@
 
 Minimal static web frontend for the ai-skill-scanner project.
 
-- URL input form with instant demo using the mock malicious skill fixture
-- Clean results viewer showing severity summary and findings table
-- Direct links to the main CLI repository and the Performance section in the signatures repository
+- Clean URL input form (empty by default)
+- Dedicated "Load Demo Fixture" button that instantly tests with the canonical mock malicious_skill.py
+- Results viewer with severity summary and findings table
+- Dynamic latest commit SHAs from both scanner and signatures repositories
+- Direct links to Performance benchmarks and main CLI repo
 
 ## Demo
 
-Open index.html or deploy to GitHub Pages / Vercel.
-Click **Demo** to load the canonical malicious skill fixture and see high-severity findings immediately.
+Open index.html locally or deploy via GitHub Pages / Vercel.
+Click **Load Demo Fixture** then **Scan Repository** to see high-severity findings from the mock malicious skill.
 
-For custom public GitHub URLs the full backend (workflow dispatch or serverless container) is planned.
+## Deployment (GitHub Pages)
+
+1. The repository already contains `.github/workflows/pages.yml`.
+2. Go to repository **Settings → Pages**.
+3. Under "Build and deployment" set **Source** to **GitHub Actions**.
+4. Save. The workflow will deploy automatically on push to main.
+5. The live site will be available at https://cftcai.github.io/ai-skill-scanner-web
+
+Caching: The workflow is intentionally lightweight (no Node.js build step). No additional caching is required for the current static HTML + CDN setup. If you expand to a full Next.js build in the future, add `actions/cache` for node_modules and build cache.
 
 ## Links
-- Main scanner: https://github.com/cftcai/ai-skill-scanner
-- Signatures & Performance benchmarks: https://github.com/cftcai/ai-skill-signatures#performance
+- Main scanner + CLI: https://github.com/cftcai/ai-skill-scanner
+- Signatures & Performance: https://github.com/cftcai/ai-skill-signatures#performance
 - Mock malicious skill fixture (canonical test case): https://github.com/cftcai/ai-skill-scanner/blob/main/tests/malicious_skill.py
 
 ## Hosting
 
-GitHub Pages (from /docs or root) or Vercel (recommended for future serverless API).
+GitHub Pages (recommended for simplicity) or Vercel (for future serverless API integration).
 
-This repository is intentionally separate to keep the core CLI and signatures clean.
+This repository is intentionally separate to keep the core CLI and signatures clean and focused.
