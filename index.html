@@ -9,7 +9,6 @@
   <style>
     @media (max-width: 640px) {
       .scan-btn { padding-top: 1rem; padding-bottom: 1rem; font-size: 1rem; }
-      .demo-btn { white-space: normal; text-align: center; }
     }
   </style>
 </head>
@@ -35,8 +34,8 @@
     <div class="mb-6 px-4 py-3 rounded-2xl bg-amber-950 border border-amber-900 text-amber-400 text-sm flex items-start gap-3">
       <i class="fa-solid fa-exclamation-triangle mt-0.5"></i>
       <div>
-        <strong>Early public release.</strong> Real custom URL scanning requires the <strong>Scan URL</strong> workflow or the CLI. 
-        The core scanner (v1.1.0) with <strong>dynamic signatures + SHA verification</strong> is fully functional.
+        <strong>Early public release.</strong> This static web interface only supports the built-in mock malicious skill.
+        Real custom URL scanning requires the <strong>Scan URL</strong> workflow or the CLI.
       </div>
     </div>
 
@@ -61,18 +60,18 @@
           <input id="url-input" type="text" placeholder="https://github.com/owner/repo/tree/main/path/to/skill" 
                  class="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-zinc-600">
           <button onclick="loadDemoFixture()" 
-                  class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-sm font-medium flex items-center justify-center gap-2 demo-btn">
+                  class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-sm font-medium flex items-center justify-center gap-2">
             <i class="fa-solid fa-flask"></i> <span>Load Demo Fixture</span>
           </button>
         </div>
       </div>
 
-      <!-- Inline error message -->
-      <div id="error-msg" class="hidden mb-4 px-4 py-2 rounded-xl bg-red-950 border border-red-900 text-red-400 text-sm"></div>
+      <!-- Inline error / info message -->
+      <div id="message-box" class="hidden mb-4 px-4 py-3 rounded-xl text-sm"></div>
 
       <p class="text-xs text-zinc-500 mb-4">
-        <strong>Demo mode:</strong> Loads a mock malicious skill that tests dangerous execution, exfiltration, prompt injection, and obfuscation.
-        For real repositories use the <strong>Scan URL</strong> workflow or CLI.
+        <strong>Currently supported in this interface:</strong> Only the built-in mock malicious skill (tests dangerous execution, exfiltration, prompt injection, and obfuscation).
+        For any other repository, use the <strong>Scan URL</strong> workflow or CLI.
       </p>
 
       <button onclick="runScan()" 
@@ -133,62 +132,57 @@ async function fetchLatestVersions() {
   }
 }
 
-function showError(message) {
-  const errorDiv = document.getElementById('error-msg');
-  errorDiv.textContent = message;
-  errorDiv.classList.remove('hidden');
-  setTimeout(() => {
-    errorDiv.classList.add('hidden');
-  }, 4000);
+function showMessage(message, type = 'error') {
+  const box = document.getElementById('message-box');
+  box.textContent = message;
+  box.className = `mb-4 px-4 py-3 rounded-xl text-sm ${type === 'error' ? 'bg-red-950 border border-red-900 text-red-400' : 'bg-amber-950 border border-amber-900 text-amber-400'}`;
+  box.classList.remove('hidden');
+}
+
+function hideMessage() {
+  document.getElementById('message-box').classList.add('hidden');
 }
 
 function loadDemoFixture() {
   const input = document.getElementById('url-input');
   input.value = 'https://github.com/cftcai/ai-skill-scanner/tree/main/tests/malicious_skill.py';
-  document.getElementById('error-msg').classList.add('hidden');
+  hideMessage();
   runScan(true);
 }
 
 function runScan(isDemo = false) {
   const resultsDiv = document.getElementById('results');
   const input = document.getElementById('url-input').value.trim();
-  const errorDiv = document.getElementById('error-msg');
-  errorDiv.classList.add('hidden');
+  hideMessage();
 
   if (!input) {
-    showError('Please enter a GitHub URL or click "Load Demo Fixture" to test.');
+    showMessage('Please click "Load Demo Fixture" to test the mock malicious skill.');
+    return;
+  }
+
+  if (!isDemo && !input.includes('malicious_skill')) {
+    showMessage('This static web interface only supports the built-in mock malicious skill. For any other repository, please use the Scan URL workflow or the CLI.');
+    resultsDiv.classList.add('hidden');
     return;
   }
 
   resultsDiv.classList.remove('hidden');
   resultsDiv.scrollIntoView({ behavior: 'smooth' });
 
-  let report;
-  if (isDemo || input.includes('malicious_skill')) {
-    report = {
-      "total_findings": 9,
-      "high_severity": 4,
-      "medium_severity": 3,
-      "low_severity": 2,
-      "findings": [
-        {"file": "tests/malicious_skill.py", "line": 20, "type": "dangerous_code_execution", "severity": "high", "snippet": "eval(\"__import__('os').system...\")"},
-        {"file": "tests/malicious_skill.py", "line": 28, "type": "suspicious_pattern", "severity": "high", "snippet": "requests.post(\"https://evil-callback...\")"},
-        {"file": "tests/malicious_skill.py", "line": 35, "type": "prompt_injection_risk", "severity": "high", "snippet": "Ignore all previous instructions..."},
-        {"file": "tests/malicious_skill.py", "line": 42, "type": "high_entropy_obfuscation", "severity": "medium", "snippet": "base64.b64encode(b\"import os...\")"},
-        {"file": "tests/malicious_skill.py", "line": 45, "type": "suspicious_pattern", "severity": "high", "snippet": "marshal.dumps(lambda: exec... )"}
-      ]
-    };
-  } else {
-    report = {
-      "total_findings": 0,
-      "high_severity": 0,
-      "medium_severity": 0,
-      "low_severity": 0,
-      "findings": []
-    };
-    showError('Custom URL scanning is not supported in this static interface. Use the Scan URL workflow or CLI instead.');
-    // Still show empty results for clarity
-  }
+  // Always show the mock malicious skill results in this static interface
+  const report = {
+    "total_findings": 9,
+    "high_severity": 4,
+    "medium_severity": 3,
+    "low_severity": 2,
+    "findings": [
+      {"file": "tests/malicious_skill.py", "line": 20, "type": "dangerous_code_execution", "severity": "high", "snippet": "eval(\"__import__('os').system...\")"},
+      {"file": "tests/malicious_skill.py", "line": 28, "type": "suspicious_pattern", "severity": "high", "snippet": "requests.post(\"https://evil-callback...\")"},
+      {"file": "tests/malicious_skill.py", "line": 35, "type": "prompt_injection_risk", "severity": "high", "snippet": "Ignore all previous instructions..."},
+      {"file": "tests/malicious_skill.py", "line": 42, "type": "high_entropy_obfuscation", "severity": "medium", "snippet": "base64.b64encode(b\"import os...\")"},
+      {"file": "tests/malicious_skill.py", "line": 45, "type": "suspicious_pattern", "severity": "high", "snippet": "marshal.dumps(lambda: exec... )"}
+    ]
+  };
 
   // Render summary
   const summary = document.getElementById('summary-cards');
@@ -226,7 +220,7 @@ function clearResults() {
   document.getElementById('results').classList.add('hidden');
   document.getElementById('findings-body').innerHTML = '';
   document.getElementById('summary-cards').innerHTML = '';
-  document.getElementById('error-msg').classList.add('hidden');
+  document.getElementById('message-box').classList.add('hidden');
 }
 
 // Fetch latest SHAs on load
