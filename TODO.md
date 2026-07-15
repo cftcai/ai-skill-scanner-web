@@ -1,17 +1,17 @@
 # TODO - ai-skill-scanner-web
 
-## High Priority (after repos go public)
+## High Priority (Completed 2026-07-15)
 
-- [ ] Update all messaging and version references to reflect scanner v1.1.0 + dynamic signature loading + SHA verification
-- [ ] Improve UI clarity: clearly distinguish what works in the web demo vs what requires the `Scan URL` workflow or CLI
-- [ ] Add a visible status indicator showing that signatures are dynamically loaded from `ai-skill-signatures` and SHA-verified
-- [ ] Enhance the "Load Demo Fixture" experience (add more varied test cases or a small malicious skill selector)
+- [x] Update all messaging and version references to reflect scanner v1.1.0 + dynamic signature loading + SHA verification
+- [x] Improve UI clarity: clearly distinguish what works in the web demo vs what requires the `Scan URL` workflow or CLI
+- [x] Add a visible status indicator showing that signatures are dynamically loaded from `ai-skill-signatures` and SHA-verified
+- [x] Enhance the “Load Demo Fixture” experience (add more varied test cases or a small malicious skill selector)
 
 ## Medium Priority
 
 - [ ] Improve error handling and user feedback when a custom URL is entered
 - [ ] Add a small note or link explaining the SHA verification process for transparency
-- [ ] Consider adding a "View latest signatures" link that opens the signatures repo
+- [ ] Consider adding a “View latest signatures” link that opens the signatures repo
 - [ ] Polish mobile responsiveness and dark mode consistency
 
 ## Future / Nice to Have
