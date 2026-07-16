@@ -1,0 +1,40 @@
+name: Validate site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: JavaScript syntax
+        run: node --check app.js
+
+      - name: No third-party CDNs
+        run: |
+          if grep -Eni 'cdn\.tailwindcss|cdnjs\.cloudflare|fontawesome|unpkg\.com|jsdelivr' index.html app.js styles.css; then
+            echo "::error::External CDN reference found"; exit 1
+          fi
+          echo "No CDN references."
+
+      - name: No inline scripts or event handlers
+        run: |
+          if grep -Eq '<script>' index.html; then echo "::error::inline <script> present"; exit 1; fi
+          if grep -Eiq '\son(click|load|error|submit|change|input|mouse|key)[a-z]*=' index.html; then
+            echo "::error::inline event handler present"; exit 1
+          fi
+          echo "No inline scripts/handlers."
+
+      - name: Content-Security-Policy present
+        run: |
+          grep -q 'http-equiv="Content-Security-Policy"' index.html || { echo "::error::CSP meta missing"; exit 1; }
+          echo "CSP present."
