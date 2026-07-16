@@ -3,236 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://api.github.com; img-src 'self' data:; base-uri 'none'; form-action 'none'">
   <title>ai-skill-scanner • Web</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <style>
-    @media (max-width: 640px) {
-      .scan-btn { padding-top: 1rem; padding-bottom: 1rem; font-size: 1rem; }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
 </head>
-<body class="bg-zinc-950 text-zinc-200">
-  <div class="max-w-4xl mx-auto p-8">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+<body>
+  <div class="container">
+    <header class="header">
       <div>
-        <h1 class="text-3xl font-semibold tracking-tight">ai-skill-scanner</h1>
-        <p class="text-zinc-400">Web • Scan public skill repositories</p>
+        <h1>ai-skill-scanner</h1>
+        <p>Web · Scan public skill repositories</p>
       </div>
-      <div class="flex gap-3 flex-wrap">
-        <a href="https://github.com/cftcai/ai-skill-scanner" class="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-sm flex items-center gap-2">
-          <i class="fa-brands fa-github"></i> <span>CLI + Scanner</span>
-        </a>
-        <a href="https://github.com/cftcai/ai-skill-signatures#performance" class="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-sm flex items-center gap-2">
-          <i class="fa-solid fa-chart-line"></i> <span>Performance</span>
-        </a>
+      <div class="header-links">
+        <a class="btn" href="https://github.com/cftcai/ai-skill-scanner">CLI + Scanner</a>
+        <a class="btn" href="https://github.com/cftcai/ai-skill-signatures#performance">Performance</a>
       </div>
-    </div>
+    </header>
 
-    <!-- Status Notice -->
-    <div class="mb-6 px-4 py-3 rounded-2xl bg-amber-950 border border-amber-900 text-amber-400 text-sm flex items-start gap-3">
-      <i class="fa-solid fa-exclamation-triangle mt-0.5"></i>
+    <div class="notice">
+      <span aria-hidden="true">⚠️</span>
       <div>
-        <strong>Early public release.</strong> This static web interface only supports the built-in mock malicious skill.
+        <strong>Early public release.</strong> This static page shows sample output for the built-in mock malicious skill.
         Real custom URL scanning requires the <strong>Scan URL</strong> workflow or the CLI.
       </div>
     </div>
 
-    <!-- Version + Signature Status -->
-    <div class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-      <div class="text-zinc-500">
-        Using Scanner <a href="https://github.com/cftcai/ai-skill-scanner" class="underline">v1.1.0</a>
-      </div>
-      <a href="https://github.com/cftcai/ai-skill-signatures" 
-         class="inline-flex items-center gap-1.5 rounded-full bg-emerald-950 px-3 py-0.5 text-emerald-400 hover:bg-emerald-900 transition-colors">
-        <i class="fa-solid fa-shield-halved text-xs"></i>
-        <span>Dynamic signature rules</span>
+    <div class="statusbar">
+      <span class="dim">Using Scanner <a href="https://github.com/cftcai/ai-skill-scanner">v1.2.0</a></span>
+      <a class="badge" href="https://github.com/cftcai/ai-skill-signatures">
+        <span aria-hidden="true">🛡️</span> Dynamic signature rules
       </a>
-      <span id="latest-sha" class="text-emerald-400 font-mono"></span>
+      <span id="latest-sha" class="mono"></span>
     </div>
 
-    <!-- Form -->
-    <div class="bg-zinc-900 rounded-2xl p-8 mb-8">
-      <div class="mb-4">
-        <label class="block text-sm text-zinc-400 mb-2">GitHub URL or path to skill / repo</label>
-        <div class="flex flex-col sm:flex-row gap-3">
-          <input id="url-input" type="text" placeholder="https://github.com/owner/repo/tree/main/path/to/skill" 
-                 class="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-zinc-600">
-          <button onclick="loadDemoFixture()" 
-                  class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-sm font-medium flex items-center justify-center gap-2">
-            <i class="fa-solid fa-flask"></i> <span>Load Demo Fixture</span>
-          </button>
-        </div>
+    <div class="card">
+      <label for="url-input">GitHub URL or path to skill / repo</label>
+      <div class="input-row">
+        <input id="url-input" class="input" type="text"
+               placeholder="https://github.com/owner/repo/tree/main/path/to/skill">
+        <button id="btn-demo" class="btn btn-primary" type="button">🧪 Load Demo Fixture</button>
       </div>
 
-      <!-- Inline error / info message -->
-      <div id="message-box" class="hidden mb-4 px-4 py-3 rounded-xl text-sm"></div>
+      <div id="message-box" class="msg hidden"></div>
 
-      <p class="text-xs text-zinc-500 mb-4">
-        <strong>Currently supported in this interface:</strong> Only the built-in mock malicious skill (tests dangerous execution, exfiltration, prompt injection, and obfuscation).
+      <p class="hint">
+        <strong>Shown here:</strong> sample output for the built-in mock malicious skill (dangerous execution, exfiltration, prompt injection, obfuscation).
         For any other repository, use the <strong>Scan URL</strong> workflow or CLI.
       </p>
 
-      <button onclick="runScan()" 
-              class="w-full py-4 rounded-2xl bg-white text-zinc-950 font-semibold flex items-center justify-center gap-2 hover:bg-zinc-100 scan-btn">
-        <i class="fa-solid fa-search"></i> <span>Scan Repository</span>
-      </button>
+      <button id="btn-scan" class="btn-white" type="button">🔍 Scan Repository</button>
     </div>
 
-    <!-- Results -->
     <div id="results" class="hidden">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-semibold">Sample Results</h2>
-        <button onclick="clearResults()" class="text-xs px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700">Clear</button>
+      <div class="results-head">
+        <h2>Sample Results</h2>
+        <button id="btn-clear" class="btn-small" type="button">Clear</button>
       </div>
 
-      <div class="mb-4 px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-400 flex items-start gap-2">
-        <i class="fa-solid fa-circle-info mt-0.5"></i>
-        <span>Illustrative sample output from the canonical <span class="font-mono">tests/malicious_skill.py</span> fixture. This static page does not execute a live scan &mdash; run the CLI or the <strong>Scan URL</strong> workflow for real results.</span>
+      <div class="info">
+        <span aria-hidden="true">ℹ️</span>
+        <span>Illustrative sample output from the canonical <span class="mono">tests/malicious_skill.py</span> fixture. This static page does not execute a live scan — run the CLI or the <strong>Scan URL</strong> workflow for real results.</span>
       </div>
 
-      <!-- Summary Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6" id="summary-cards"></div>
+      <div class="summary" id="summary-cards"></div>
 
-      <!-- Findings Table -->
-      <div class="bg-zinc-900 rounded-2xl overflow-hidden">
-        <table class="w-full text-sm">
-          <thead class="bg-zinc-950">
+      <div class="table-wrap">
+        <table>
+          <thead>
             <tr>
-              <th class="text-left px-6 py-4 font-medium text-zinc-400">File / Line</th>
-              <th class="text-left px-6 py-4 font-medium text-zinc-400">Type</th>
-              <th class="text-left px-6 py-4 font-medium text-zinc-400">Severity</th>
-              <th class="text-left px-6 py-4 font-medium text-zinc-400">Snippet</th>
+              <th>File / Line</th>
+              <th>Type</th>
+              <th>Severity</th>
+              <th>Snippet</th>
             </tr>
           </thead>
-          <tbody id="findings-body" class="divide-y divide-zinc-800"></tbody>
+          <tbody id="findings-body"></tbody>
         </table>
       </div>
 
-      <div class="mt-4 text-xs text-zinc-500">
-        Full structured JSON report available via CLI or the Scan URL workflow artifact.
-        <a href="https://github.com/cftcai/ai-skill-scanner" class="underline">View source</a>
+      <div class="report-note">
+        Full structured JSON/SARIF report available via the CLI or the Scan URL workflow artifact.
+        <a href="https://github.com/cftcai/ai-skill-scanner">View source</a>
       </div>
     </div>
 
-    <!-- Footer note -->
-    <div class="mt-12 text-center text-xs text-zinc-500">
-      This is a minimal static web interface. Real scanning of custom URLs requires the <strong>Scan URL</strong> workflow or the CLI.
+    <div class="footer">
+      Minimal static interface. Real scanning of custom URLs requires the <strong>Scan URL</strong> workflow or the CLI.
     </div>
   </div>
-
-<script>
-async function fetchLatestVersions() {
-  try {
-    const [scannerRes, sigRes] = await Promise.all([
-      fetch('https://api.github.com/repos/cftcai/ai-skill-scanner/commits/main'),
-      fetch('https://api.github.com/repos/cftcai/ai-skill-signatures/commits/main')
-    ]);
-    const scanner = await scannerRes.json();
-    const sig = await sigRes.json();
-    document.getElementById('latest-sha').innerHTML = `• Scanner: <span class="font-mono">${scanner.sha.substring(0,7)}</span> • Signatures: <span class="font-mono">${sig.sha.substring(0,7)}</span>`;
-  } catch(e) {
-    // Silent fail
-  }
-}
-
-function showMessage(message, type = 'error') {
-  const box = document.getElementById('message-box');
-  box.textContent = message;
-  box.className = `mb-4 px-4 py-3 rounded-xl text-sm ${type === 'error' ? 'bg-red-950 border border-red-900 text-red-400' : 'bg-amber-950 border border-amber-900 text-amber-400'}`;
-  box.classList.remove('hidden');
-}
-
-function hideMessage() {
-  document.getElementById('message-box').classList.add('hidden');
-}
-
-function loadDemoFixture() {
-  const input = document.getElementById('url-input');
-  input.value = 'https://github.com/cftcai/ai-skill-scanner/tree/main/tests/malicious_skill.py';
-  hideMessage();
-  runScan(true);
-}
-
-function runScan(isDemo = false) {
-  const resultsDiv = document.getElementById('results');
-  const input = document.getElementById('url-input').value.trim();
-  hideMessage();
-
-  if (!input) {
-    showMessage('Please click "Load Demo Fixture" to test the mock malicious skill.');
-    return;
-  }
-
-  if (!isDemo && !input.includes('malicious_skill')) {
-    showMessage('This static web interface only supports the built-in mock malicious skill. For any other repository, please use the Scan URL workflow or the CLI.');
-    resultsDiv.classList.add('hidden');
-    return;
-  }
-
-  resultsDiv.classList.remove('hidden');
-  resultsDiv.scrollIntoView({ behavior: 'smooth' });
-
-  // Illustrative sample output from the canonical tests/malicious_skill.py
-  // fixture. This static page does not run a live scan; summary counts are
-  // derived from the findings below so they can never drift out of sync.
-  const findings = [
-    {"file": "tests/malicious_skill.py", "line": 20, "type": "dangerous_code_execution", "severity": "high", "snippet": "eval(\"__import__('os').system...\")"},
-    {"file": "tests/malicious_skill.py", "line": 28, "type": "suspicious_pattern", "severity": "high", "snippet": "requests.post(\"https://evil-callback...\")"},
-    {"file": "tests/malicious_skill.py", "line": 35, "type": "prompt_injection_risk", "severity": "high", "snippet": "Ignore all previous instructions..."},
-    {"file": "tests/malicious_skill.py", "line": 42, "type": "high_entropy_obfuscation", "severity": "medium", "snippet": "base64.b64encode(b\"import os...\")"},
-    {"file": "tests/malicious_skill.py", "line": 45, "type": "suspicious_pattern", "severity": "high", "snippet": "marshal.dumps(lambda: exec... )"}
-  ];
-
-  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const highCount = findings.filter(f => f.severity === 'high').length;
-  const mediumLowCount = findings.length - highCount;
-
-  // Render summary (computed from findings)
-  const summary = document.getElementById('summary-cards');
-  summary.innerHTML = `
-    <div class="bg-zinc-900 rounded-2xl p-5">
-      <div class="text-emerald-400 text-3xl font-semibold">${findings.length}</div>
-      <div class="text-xs text-zinc-400 mt-1">Total Findings</div>
-    </div>
-    <div class="bg-zinc-900 rounded-2xl p-5">
-      <div class="text-red-400 text-3xl font-semibold">${highCount}</div>
-      <div class="text-xs text-zinc-400 mt-1">High Severity</div>
-    </div>
-    <div class="bg-zinc-900 rounded-2xl p-5">
-      <div class="text-amber-400 text-3xl font-semibold">${mediumLowCount}</div>
-      <div class="text-xs text-zinc-400 mt-1">Medium / Low</div>
-    </div>
-  `;
-
-  // Render findings table
-  const tbody = document.getElementById('findings-body');
-  tbody.innerHTML = '';
-  findings.forEach(f => {
-    const row = document.createElement('tr');
-    const sevClass = f.severity === 'high' ? 'bg-red-900 text-red-400' : 'bg-amber-900 text-amber-400';
-    row.innerHTML = `
-      <td class="px-6 py-4 font-mono text-xs text-zinc-400">${esc(f.file)}:${esc(f.line)}</td>
-      <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-full text-xs bg-zinc-800">${esc(f.type)}</span></td>
-      <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-full text-xs ${sevClass}">${esc(f.severity)}</span></td>
-      <td class="px-6 py-4 font-mono text-xs text-zinc-400 truncate max-w-[320px]">${esc(f.snippet)}</td>
-    `;
-    tbody.appendChild(row);
-  });
-}
-
-function clearResults() {
-  document.getElementById('results').classList.add('hidden');
-  document.getElementById('findings-body').innerHTML = '';
-  document.getElementById('summary-cards').innerHTML = '';
-  document.getElementById('message-box').classList.add('hidden');
-}
-
-// Fetch latest SHAs on load
-window.onload = () => {
-  fetchLatestVersions();
-};
-</script>
 </body>
 </html>
