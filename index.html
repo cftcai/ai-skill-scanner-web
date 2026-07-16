@@ -47,7 +47,7 @@
       <a href="https://github.com/cftcai/ai-skill-signatures" 
          class="inline-flex items-center gap-1.5 rounded-full bg-emerald-950 px-3 py-0.5 text-emerald-400 hover:bg-emerald-900 transition-colors">
         <i class="fa-solid fa-shield-halved text-xs"></i>
-        <span>Dynamic signatures + SHA verified</span>
+        <span>Dynamic signature rules</span>
       </a>
       <span id="latest-sha" class="text-emerald-400 font-mono"></span>
     </div>
@@ -83,8 +83,13 @@
     <!-- Results -->
     <div id="results" class="hidden">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-semibold">Scan Results</h2>
+        <h2 class="text-xl font-semibold">Sample Results</h2>
         <button onclick="clearResults()" class="text-xs px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700">Clear</button>
+      </div>
+
+      <div class="mb-4 px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-400 flex items-start gap-2">
+        <i class="fa-solid fa-circle-info mt-0.5"></i>
+        <span>Illustrative sample output from the canonical <span class="font-mono">tests/malicious_skill.py</span> fixture. This static page does not execute a live scan &mdash; run the CLI or the <strong>Scan URL</strong> workflow for real results.</span>
       </div>
 
       <!-- Summary Cards -->
@@ -169,34 +174,34 @@ function runScan(isDemo = false) {
   resultsDiv.classList.remove('hidden');
   resultsDiv.scrollIntoView({ behavior: 'smooth' });
 
-  // Always show the mock malicious skill results in this static interface
-  const report = {
-    "total_findings": 9,
-    "high_severity": 4,
-    "medium_severity": 3,
-    "low_severity": 2,
-    "findings": [
-      {"file": "tests/malicious_skill.py", "line": 20, "type": "dangerous_code_execution", "severity": "high", "snippet": "eval(\"__import__('os').system...\")"},
-      {"file": "tests/malicious_skill.py", "line": 28, "type": "suspicious_pattern", "severity": "high", "snippet": "requests.post(\"https://evil-callback...\")"},
-      {"file": "tests/malicious_skill.py", "line": 35, "type": "prompt_injection_risk", "severity": "high", "snippet": "Ignore all previous instructions..."},
-      {"file": "tests/malicious_skill.py", "line": 42, "type": "high_entropy_obfuscation", "severity": "medium", "snippet": "base64.b64encode(b\"import os...\")"},
-      {"file": "tests/malicious_skill.py", "line": 45, "type": "suspicious_pattern", "severity": "high", "snippet": "marshal.dumps(lambda: exec... )"}
-    ]
-  };
+  // Illustrative sample output from the canonical tests/malicious_skill.py
+  // fixture. This static page does not run a live scan; summary counts are
+  // derived from the findings below so they can never drift out of sync.
+  const findings = [
+    {"file": "tests/malicious_skill.py", "line": 20, "type": "dangerous_code_execution", "severity": "high", "snippet": "eval(\"__import__('os').system...\")"},
+    {"file": "tests/malicious_skill.py", "line": 28, "type": "suspicious_pattern", "severity": "high", "snippet": "requests.post(\"https://evil-callback...\")"},
+    {"file": "tests/malicious_skill.py", "line": 35, "type": "prompt_injection_risk", "severity": "high", "snippet": "Ignore all previous instructions..."},
+    {"file": "tests/malicious_skill.py", "line": 42, "type": "high_entropy_obfuscation", "severity": "medium", "snippet": "base64.b64encode(b\"import os...\")"},
+    {"file": "tests/malicious_skill.py", "line": 45, "type": "suspicious_pattern", "severity": "high", "snippet": "marshal.dumps(lambda: exec... )"}
+  ];
 
-  // Render summary
+  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const highCount = findings.filter(f => f.severity === 'high').length;
+  const mediumLowCount = findings.length - highCount;
+
+  // Render summary (computed from findings)
   const summary = document.getElementById('summary-cards');
   summary.innerHTML = `
     <div class="bg-zinc-900 rounded-2xl p-5">
-      <div class="text-emerald-400 text-3xl font-semibold">${report.total_findings}</div>
+      <div class="text-emerald-400 text-3xl font-semibold">${findings.length}</div>
       <div class="text-xs text-zinc-400 mt-1">Total Findings</div>
     </div>
     <div class="bg-zinc-900 rounded-2xl p-5">
-      <div class="text-red-400 text-3xl font-semibold">${report.high_severity}</div>
+      <div class="text-red-400 text-3xl font-semibold">${highCount}</div>
       <div class="text-xs text-zinc-400 mt-1">High Severity</div>
     </div>
     <div class="bg-zinc-900 rounded-2xl p-5">
-      <div class="text-amber-400 text-3xl font-semibold">${report.medium_severity + report.low_severity}</div>
+      <div class="text-amber-400 text-3xl font-semibold">${mediumLowCount}</div>
       <div class="text-xs text-zinc-400 mt-1">Medium / Low</div>
     </div>
   `;
@@ -204,13 +209,14 @@ function runScan(isDemo = false) {
   // Render findings table
   const tbody = document.getElementById('findings-body');
   tbody.innerHTML = '';
-  report.findings.forEach(f => {
+  findings.forEach(f => {
     const row = document.createElement('tr');
+    const sevClass = f.severity === 'high' ? 'bg-red-900 text-red-400' : 'bg-amber-900 text-amber-400';
     row.innerHTML = `
-      <td class="px-6 py-4 font-mono text-xs text-zinc-400">${f.file}:${f.line}</td>
-      <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-full text-xs bg-zinc-800">${f.type}</span></td>
-      <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-full text-xs ${f.severity === 'high' ? 'bg-red-900 text-red-400' : 'bg-amber-900 text-amber-400'}>${f.severity}</span></td>
-      <td class="px-6 py-4 font-mono text-xs text-zinc-400 truncate max-w-[320px]">${f.snippet}</td>
+      <td class="px-6 py-4 font-mono text-xs text-zinc-400">${esc(f.file)}:${esc(f.line)}</td>
+      <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-full text-xs bg-zinc-800">${esc(f.type)}</span></td>
+      <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-full text-xs ${sevClass}">${esc(f.severity)}</span></td>
+      <td class="px-6 py-4 font-mono text-xs text-zinc-400 truncate max-w-[320px]">${esc(f.snippet)}</td>
     `;
     tbody.appendChild(row);
   });
