@@ -5,10 +5,14 @@
 Static web interface for the ai-skill-scanner project.
 
 - Clean URL input form (empty by default)
-- Dedicated "Load Demo Fixture" button that instantly tests with the canonical mock malicious_skill.py
+- Dedicated "Load Demo Fixture" button that shows sample output for the canonical mock malicious_skill.py
 - Results viewer with severity summary and findings table
 - Dynamic latest commit SHAs from both scanner and signatures repositories
 - Direct links to Performance benchmarks and main CLI repo
+
+### Security
+
+Fully self-contained: no third-party CDNs. `index.html`, `styles.css`, and `app.js` are served from the same origin, and a strict Content-Security-Policy (`default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://api.github.com`) blocks external scripts, inline scripts, and inline event handlers. The DOM is built with `textContent`/`createElement`, so findings cannot inject markup.
 
 ## Live Site
 
@@ -21,7 +25,7 @@ https://cftcai.github.io/ai-skill-scanner-web
 3. Under "Build and deployment" set **Source** to **GitHub Actions**.
 4. Save. The workflow will deploy automatically on push to main.
 
-Caching: The workflow is intentionally lightweight (no Node.js build step). No additional caching is required for the current static HTML + CDN setup.
+The workflow is intentionally lightweight (no Node.js build step). The site is plain HTML/CSS/JS with no dependencies to install or bundle.
 
 ## Links
 - Main scanner + CLI: https://github.com/cftcai/ai-skill-scanner
